@@ -44,7 +44,7 @@ public class ActionsFileReaderTest {
     }
 
     @Test
-    public void whenCouldNotParseActionReturnEmptyOptional() {
+    public void whenCouldNotParseActionReturnEmptyOptionalAndLogException() {
         assertEquals(
                 Optional.empty(),
                 parser.parseLine("o,1,B,55s,100s"));

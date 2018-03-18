@@ -9,11 +9,12 @@ import static org.junit.Assert.assertEquals;
 
 public class OrderBookApplicationTest {
 
+    static final String PATH_TO_FILE = "./src/test/resources/actions-file-1.txt";
 
     @Test
     public void testAppFromFile() {
         OrderBookApplication app = new OrderBookApplication();
-        OrderBook orderBook = app.run("./src/test/resources/actions-file-1.txt");
+        OrderBook orderBook = app.run(PATH_TO_FILE);
 
         assertEquals(new Order(0, BUY, 95, 20), orderBook.getHighestBuyOrder().get());
         assertEquals(new Order(4, SELL, 99, 50), orderBook.getLowestSellOrder().get());
