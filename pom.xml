@@ -25,7 +25,7 @@
           <mainClass>org.and.orderbook.OrderBookApplication</mainClass>
           <arguments>
             <!--<argument>/Users/myuser/actions-file-1.txt</argument>-->
-            <argument>../src/test/resources/actions-file-1.txt</argument>
+            <argument>absolute_path_to_file</argument>
           </arguments>
         </configuration>
       </plugin>

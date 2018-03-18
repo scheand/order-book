@@ -25,7 +25,6 @@ public class ActionsFileReader {
 
     public Stream<Action> actions(String pathToFile) throws CouldNotParseActionsFile {
         try {
-            //getClass().getClassLoader().getResource(pathToFile).toURI()
             Path path = Paths.get(pathToFile);
             return Files.lines(path).map(this::parseLine)
                     .filter(o -> o.isPresent())

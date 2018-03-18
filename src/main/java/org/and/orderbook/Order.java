@@ -15,10 +15,15 @@ public class Order {
     private Integer size;
 
     public Order(Integer id, Side side, Integer price, Integer size) {
-        Objects.requireNonNull(id);
-        Objects.requireNonNull(side);
-        Objects.requireNonNull(price);
-        Objects.requireNonNull(side);
+        Objects.requireNonNull(id, "Order Id required");
+        Objects.requireNonNull(side, "Side is required");
+        if(price == null || price < 0) {
+            throw new IllegalArgumentException("Price must be positive number");
+        }
+        if(size == null || size < 0) {
+            throw new  IllegalArgumentException("Size must be positive number");
+        }
+
         this.id = id;
         this.side = side;
         this.price = price;
