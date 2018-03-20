@@ -8,29 +8,30 @@ import static org.and.orderbook.Order.Side.SELL;
 public class OrderBook {
 
     private final Map<Integer, Order> idOrderMap = new HashMap<>();
-    private final PriceSizeStore priceSizeStore = new PriceSizeStore();
+    private final Map<Integer, Integer> priceSizeMap = new HashMap<>();
 
     private final PriorityQueue<Order> buyQueue = new PriorityQueue<>(
             Comparator.comparingInt(Order::getPrice).reversed());
     private final PriorityQueue<Order> sellQueue = new PriorityQueue<>(
             Comparator.comparingInt(Order::getPrice));
 
+
     public int size() {
         return idOrderMap.size();
     }
 
-    public void add(Order order) {
-        Objects.requireNonNull(order, "Order must b not null.");
-        if (idOrderMap.containsKey(order.getId())) {
-            throw new IllegalArgumentException("There is already order with id=" + order.getId() + ".");
+    public void add(Order newOrder) {
+        Objects.requireNonNull(newOrder, "Order must be not null.");
+
+        Queue<Order> oppositeQueue = newOrder.getSide() == BUY ? sellQueue : buyQueue;
+
+        Order resultOrder = newOrder;
+        while (canBeMutualAnnihilated(resultOrder, oppositeQueue.peek())) {
+            resultOrder = processOrders(resultOrder, pullOut(oppositeQueue.peek()));
         }
 
-        if (BUY == order.getSide()) {
-            process(sellQueue, order);
-        } else if (SELL == order.getSide()) {
-            process(buyQueue, order);
-        } else {
-            throw new IllegalArgumentException("Unknown side value '" + order.getSide() + "'");
+        if(resultOrder != null) {
+            pushIn(resultOrder);
         }
     }
 
@@ -40,7 +41,7 @@ public class OrderBook {
         if (order == null) {
             return false;
         } else {
-            pull(order);
+            pullOut(order);
             return true;
         }
     }
@@ -55,40 +56,23 @@ public class OrderBook {
 
     public Integer getSizeByPrice(Integer price) {
         Objects.requireNonNull(price, "Price must be nut null.");
-        return priceSizeStore.getSize(price);
+        return priceSizeMap.containsKey(price) ? priceSizeMap.get(price) : 0;
     }
 
-    private void process(PriorityQueue<Order> oppositeQueue, Order order) {
-
-        Order leftOrderToTarget = order;
-
-        while (canProcessOrders(oppositeQueue.peek(), leftOrderToTarget)) {
-            Order bestOppositeOrder = pull(oppositeQueue.peek());
-
-            int minSize = Math.min(bestOppositeOrder.getSize(), leftOrderToTarget.getSize());
-            int leftSizeToOpposite = bestOppositeOrder.getSize() - minSize;
-            int leftSizeToTarget = leftOrderToTarget.getSize() - minSize;
-
-            if (leftSizeToOpposite > 0) {
-                push(new Order(bestOppositeOrder, leftSizeToOpposite));
-            }
-
-            if (leftSizeToTarget > 0) {
-                leftOrderToTarget = new Order(leftOrderToTarget, leftSizeToTarget);
-            } else {
-                leftOrderToTarget = null;
-            }
-
+    private Order processOrders(Order newOrder, Order oppositeOrder) {
+        if (newOrder.getSize() == oppositeOrder.getSize()) {
+            return null;
+        } else {
+            int mutualAnnihilatedSize = Math.min(newOrder.getSize(), oppositeOrder.getSize());
+            Order greatestBySizeOrder = newOrder.getSize() - mutualAnnihilatedSize > 0 ?
+                    newOrder : oppositeOrder;
+            Integer leftAfterAnnihilatingSize = greatestBySizeOrder.getSize() - mutualAnnihilatedSize;
+            return new Order(greatestBySizeOrder, leftAfterAnnihilatingSize);
         }
-
-        if (leftOrderToTarget != null) {
-            push(leftOrderToTarget);
-        }
-
     }
 
-    private boolean canProcessOrders(Order o1, Order o2) {
-        if (o1 != null && o2 != null) {
+    private boolean canBeMutualAnnihilated(Order o1, Order o2) {
+        if (o1 != null && o2 != null && o1.getSide() != o2.getSide()) {
             Order buyOrder = o1.getSide() == BUY ? o1 : o2;
             Order sellOrder = o1.getSide() == SELL ? o1 : o2;
             return buyOrder.getPrice().compareTo(sellOrder.getPrice()) >= 0;
@@ -97,62 +81,47 @@ public class OrderBook {
         }
     }
 
-    private void push(Order order) {
+    private void pushIn(Order order) {
+        checkOrderIdentity(order);
+        idOrderMap.put(order.getId(), order);
+
         if (order.getSide() == BUY) {
             buyQueue.add(order);
         } else {
             sellQueue.add(order);
         }
-        priceSizeStore.add(order);
-        idOrderMap.put(order.getId(), order);
+
+        Integer newSize = priceSizeMap.containsKey(order.getPrice()) ?
+                order.getSize() + priceSizeMap.get(order.getPrice()) :
+                order.getSize();
+
+        priceSizeMap.put(order.getPrice(), newSize);
     }
 
-    private Order pull(Order order) {
+    private Order pullOut(Order order) {
+        idOrderMap.remove(order.getId());
+
         if (order.getSide() == BUY) {
             buyQueue.remove(order);
         } else {
             sellQueue.remove(order);
         }
-        priceSizeStore.remove(order);
-        idOrderMap.remove(order.getId());
+
+        Integer newSize = priceSizeMap.get(order.getPrice()) - order.getSize();
+        if (newSize > 0) {
+            priceSizeMap.put(order.getPrice(), newSize);
+        } else {
+            priceSizeMap.remove(order.getPrice());
+        }
+
         return order;
     }
 
-
-    private static class PriceSizeStore {
-
-        Map<Integer, List<Order>> priceOrdersMap = new HashMap<>();
-
-        public void add(Order order) {
-            if (!priceOrdersMap.containsKey(order.getPrice())) {
-                priceOrdersMap.put(order.getPrice(), new ArrayList<>());
-            }
-            priceOrdersMap.get(order.getPrice()).add(order);
-
+    private void checkOrderIdentity(Order order) {
+        if (idOrderMap.containsKey(order.getId())) {
+            throw new IllegalArgumentException("There is already order with id="
+                    + order.getId() + ".");
         }
-
-        public void remove(Order order) {
-            List<Order> orders = priceOrdersMap.get(order.getPrice());
-            if (order == null) {
-                throw new IllegalStateException("Could not find orders by price=" + order.getPrice());
-            }
-            orders.remove(order);
-            if (orders.isEmpty()) {
-                priceOrdersMap.remove(order.getPrice());
-            }
-        }
-
-        public Integer getSize(Integer price) {
-            List<Order> orders = priceOrdersMap.get(price);
-            if(orders == null || orders.isEmpty()) {
-                return 0;
-            } else {
-                return orders.stream().mapToInt(Order::getSize).sum();
-            }
-        }
-
-
     }
-
 
 }
