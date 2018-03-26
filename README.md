@@ -3,5 +3,5 @@ Just find placeholder absolute_path_to_file in pom.xml and replace it by your pa
 Then run command :
        mvn package exec:java
 
-Also you can find integration test OrderBookApplicationTest.
+You can find integration test OrderBookIntegrationTest.
 I think it might be good entry point for code research.

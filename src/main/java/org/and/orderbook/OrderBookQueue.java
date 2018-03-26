@@ -5,7 +5,9 @@ import java.util.*;
 import static org.and.orderbook.Order.Side.BUY;
 import static org.and.orderbook.Order.Side.SELL;
 
-public class OrderBook {
+//previous implementation
+@Deprecated
+public class OrderBookQueue {
 
     private final Map<Integer, Order> idOrderMap = new HashMap<>();
     private final Map<Integer, Integer> priceSizeMap = new HashMap<>();
@@ -75,7 +77,7 @@ public class OrderBook {
         if (o1 != null && o2 != null && o1.getSide() != o2.getSide()) {
             Order buyOrder = o1.getSide() == BUY ? o1 : o2;
             Order sellOrder = o1.getSide() == SELL ? o1 : o2;
-            return buyOrder.getPrice().compareTo(sellOrder.getPrice()) >= 0;
+            return buyOrder.getPrice() >= sellOrder.getPrice();
         } else {
             return false;
         }

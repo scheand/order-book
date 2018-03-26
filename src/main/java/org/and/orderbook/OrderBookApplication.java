@@ -1,29 +1,34 @@
 package org.and.orderbook;
 
-import org.and.orderbook.actions.Action;
 import org.and.orderbook.actions.ActionsFileReader;
-
-import java.util.stream.Stream;
 
 public class OrderBookApplication {
 
-    public OrderBook run(String filePath) {
-        OrderBook orderBook = new OrderBook();
-        ActionsFileReader parser = new ActionsFileReader(orderBook);
+    public IOrderBook runFirstTask(String filePath) {
+        ActionsFileReader reader = ActionsFileReader.firstTaskReader();
+        reader.parse(filePath);
+        return run(reader);
+    }
 
-        try(Stream<Action> actionStream = parser.actions(filePath)) {
-            actionStream.forEach(Action::execute);
-        }
+    public IOrderBook runSecondTask(String filePath) {
+        ActionsFileReader reader = ActionsFileReader.secondTaskReader();
+        reader.parse(filePath);
+        return run(reader);
+    }
+
+    private IOrderBook run(ActionsFileReader reader) {
+        IOrderBook orderBook = new BookStoreArray(reader.getMinPrice());
+        reader.getActions().forEach(action -> action.apply(orderBook));
         return orderBook;
     }
 
     public static void main(String[] args) {
-        if(args.length == 0) {
+        if (args.length == 0) {
             throw new IllegalArgumentException("Please point action's file.");
         }
         String pathToFile = args[0];
         OrderBookApplication orderBookApp = new OrderBookApplication();
-        orderBookApp.run(pathToFile);
+        orderBookApp.runFirstTask(pathToFile);
     }
 
 

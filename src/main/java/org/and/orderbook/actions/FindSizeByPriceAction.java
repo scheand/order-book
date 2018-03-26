@@ -1,23 +1,22 @@
 package org.and.orderbook.actions;
 
-import org.and.orderbook.OrderBook;
+import org.and.orderbook.IOrderBook;
 
 import java.util.Objects;
 
-class FindSizeByPriceAction extends AbstractAction {
+class FindSizeByPriceAction implements Action {
 
     private final Integer price;
 
-    FindSizeByPriceAction(OrderBook orderBook, Integer price) {
-        super(orderBook);
+    FindSizeByPriceAction(Integer price) {
         Objects.requireNonNull(price);
         this.price = price;
     }
 
     @Override
-    public void execute() {
-        Integer size = orderBook.getSizeByPrice(price);
-        LOG.info(size.toString());
+    public void apply(IOrderBook orderBook) {
+        Integer size = orderBook.sizeByPrice(price);
+        System.out.println(size);
     }
 
     @Override

@@ -11,11 +11,16 @@ public class Order {
 
     private Integer id;
     private Side side;
-    private Integer price;
-    private Integer size;
+    private int price;
+    private int size;
+
+
+    public Order(Side side, Integer price, Integer size) {
+        this(null, side, price, size);
+    }
 
     public Order(Integer id, Side side, Integer price, Integer size) {
-        Objects.requireNonNull(id, "Order Id required");
+        //Objects.requireNonNull(id, "Order Id required");
         Objects.requireNonNull(side, "Side is required");
         if(price == null || price < 0) {
             throw new IllegalArgumentException("Price must be positive number");
@@ -42,11 +47,11 @@ public class Order {
         return side;
     }
 
-    public Integer getPrice() {
+    public int getPrice() {
         return price;
     }
 
-    public Integer getSize() {
+    public int getSize() {
         return size;
     }
 
@@ -69,16 +74,16 @@ public class Order {
 
         if (!id.equals(order.id)) return false;
         if (side != order.side) return false;
-        if (!price.equals(order.price)) return false;
-        return size.equals(order.size);
+        if (price != order.price) return false;
+        return size == order.size;
     }
 
     @Override
     public int hashCode() {
         int result = id.hashCode();
         result = 31 * result + side.hashCode();
-        result = 31 * result + price.hashCode();
-        result = 31 * result + size.hashCode();
+        result = 31 * result + price;
+        result = 31 * result + size;
         return result;
     }
 }

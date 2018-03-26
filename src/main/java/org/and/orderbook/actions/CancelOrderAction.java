@@ -1,21 +1,20 @@
 package org.and.orderbook.actions;
 
-import org.and.orderbook.OrderBook;
+import org.and.orderbook.IOrderBook;
 
 import java.util.Objects;
 
-class CancelOrderAction extends AbstractAction {
+class CancelOrderAction implements Action {
 
     private final Integer id;
 
-    CancelOrderAction(OrderBook orderBook, Integer id) {
-        super(orderBook);
+    CancelOrderAction(Integer id) {
         Objects.requireNonNull(id, "Order ID must be specified for 'cancel' action.");
         this.id = id;
     }
 
     @Override
-    public void execute() {
+    public void apply(IOrderBook orderBook) {
         orderBook.cancelOrder(id);
     }
 

@@ -10,14 +10,14 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-public class OrderBookTest {
+public class OrderBookQueueTest {
 
 
-    OrderBook orderBook;
+    OrderBookQueue orderBook;
 
     @Before
     public void setUp() {
-        orderBook = new OrderBook();
+        orderBook = new OrderBookQueue();
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -50,7 +50,7 @@ public class OrderBookTest {
 
     @Test
     public void whenPriceOfBuyOrderGreaterOrEqualThanOfTheSellOrderNeedToDoMutualAnnihilation() {
-        OrderBook orderBook = new OrderBook();
+        OrderBookQueue orderBook = new OrderBookQueue();
 
         orderBook.add(new Order(1, BUY, 50, 100));
         assertEquals(new Order(1, BUY, 50, 100), orderBook.getHighestBuyOrder().get());

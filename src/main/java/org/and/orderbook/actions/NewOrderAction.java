@@ -1,23 +1,26 @@
 package org.and.orderbook.actions;
 
+import org.and.orderbook.IOrderBook;
 import org.and.orderbook.Order;
-import org.and.orderbook.OrderBook;
 
 import java.util.Objects;
 
-class NewOrderAction extends AbstractAction {
+class NewOrderAction implements Action {
 
     final private Order order;
 
-    NewOrderAction(OrderBook orderBook, Order order) {
-        super(orderBook);
+    NewOrderAction(Order order) {
         Objects.requireNonNull(order, "Order must be specified for New Order Action.");
         this.order = order;
     }
 
     @Override
-    public void execute() {
+    public void apply(IOrderBook orderBook) {
         orderBook.add(order);
+    }
+
+    public Order getOrder() {
+        return order;
     }
 
     @Override
@@ -27,7 +30,6 @@ class NewOrderAction extends AbstractAction {
 
         NewOrderAction that = (NewOrderAction) o;
 
-        if (orderBook != null ? !orderBook.equals(that.orderBook) : that.orderBook != null) return false;
         return order.equals(that.order);
     }
 
