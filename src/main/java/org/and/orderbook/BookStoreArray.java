@@ -138,7 +138,7 @@ public class BookStoreArray implements IOrderBook {
     }
 
     private void removeByPrice(int price, int size, PriceBoundary boundary) {
-        if (boundary.getMin() != null && boundary.getMax() != null) {
+        if (boundary.notEmpty()) {
             if (price > boundary.getMax() || price < boundary.getMin()) {
                 throw new IllegalArgumentException("Illegal price " + price +
                         " for remove. Must be between " + boundary.getMin() + " and " + boundary.getMax() + ".");
@@ -148,7 +148,7 @@ public class BookStoreArray implements IOrderBook {
 
             if (leftSize == 0) {
                 int p;
-                if (boundary.getMin() == boundary.getMax()) {
+                if (boundary.getMin().equals(boundary.getMax())) {
                     boundary.setMin(null);
                     boundary.setMax(null);
                 } else if (boundary.getMin() == price) {

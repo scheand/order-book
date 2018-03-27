@@ -244,5 +244,25 @@ public class BookStoreArrayTest {
 
     }
 
+    @Test
+    public void testBigPrice() {
+        BookStoreArray bookStore1 = new BookStoreArray(999_990_000);
+        bookStore1.add(new Order(BUY, 999_990_000, 25));
+        bookStore1.add(new Order(BUY, 999_990_100, 25));
+        bookStore1.add(new Order(BUY, 999_990_200, 25));
+        bookStore1.add(new Order(BUY, 1_000_000_000, 25));
 
+        Assert.assertEquals(valueOf(1_000_000_000), bookStore1.bestBid());
+
+        bookStore1.sell(70);
+
+        Assert.assertEquals(valueOf(999_990_100), bookStore1.bestBid());
+        Assert.assertEquals(valueOf(5), bookStore1.sizeByPrice(bookStore1.bestBid()));
+
+        bookStore1.sell(5);
+        Assert.assertEquals(valueOf(999_990_000), bookStore1.bestBid());
+
+        bookStore1.sell(25);
+        Assert.assertEquals(null, bookStore1.bestBid());
+    }
 }
